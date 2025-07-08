@@ -1,0 +1,238 @@
+/* Reset */
+* {
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  direction: rtl;
+  background: linear-gradient(135deg, #4a90e2, #50e3c2);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-size: 14px;
+}
+
+/* تسجيل الدخول */
+.login-page {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #4a90e2, #50e3c2);
+}
+
+.form-container {
+  background-color: #ffffffee;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.form-container h2 {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+.form-container input {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  transition: border-color 0.3s;
+}
+
+.form-container input:focus {
+  border-color: #4a90e2;
+  outline: none;
+}
+
+.form-container button {
+  width: 100%;
+  padding: 12px;
+  background: #4a90e2;
+  color: white;
+  font-size: 16px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.form-container button:hover {
+  background: #357abd;
+}
+
+#errorMsg {
+  color: red;
+  margin-top: 10px;
+}
+
+/* لوحة التحكم */
+
+.header {
+  background-color: #4a90e2;
+  color: white;
+  padding: 15px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 4px solid #357abd;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.header button {
+  background: #f44336;
+  border: none;
+  padding: 10px 15px;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.main-content {
+  padding: 30px;
+  max-width: 1200px;
+  margin: auto;
+  flex-grow: 1;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 0 20px #ccc;
+}
+
+.add-worker-section {
+  background: #f9f9f9;
+  padding: 20px;
+  margin-bottom: 30px;
+  border-radius: 12px;
+  box-shadow: 0 0 15px #ddd;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.add-worker-section h2 {
+  margin-bottom: 15px;
+  color: #333;
+}
+
+#addWorkerForm {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+#addWorkerForm input {
+  flex: 1 1 200px;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+#addWorkerForm button {
+  padding: 12px 20px;
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  flex-grow: 1;
+}
+
+#addMsg {
+  margin-top: 10px;
+  color: green;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+  justify-content: space-between;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.controls input,
+.controls select {
+  padding: 10px;
+  width: 250px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+}
+
+.export-buttons button {
+  padding: 10px 15px;
+  background: #50e3c2;
+  border: none;
+  color: white;
+  font-weight: bold;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.export-buttons button:hover {
+  background: #3dd3ae;
+}
+
+.table-container {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  box-shadow: 0 2px 8px #ccc;
+}
+
+th,
+td {
+  padding: 12px;
+  border
+th,
+td {
+  padding: 12px;
+  border: 1px solid #eee;
+  text-align: center;
+}
+
+th {
+  background: #f0f0f0;
+  color: #333;
+}
+
+tr:nth-child(even) {
+  background: #fafafa;
+}
+
+/* زر تعديل وحذف */
+button.editBtn,
+button.deleteBtn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  margin: 0 5px;
+}
+
+button.editBtn:hover {
+  color: #4a90e2;
+}
+
+button.deleteBtn:hover {
+  color: #f44336;
+}

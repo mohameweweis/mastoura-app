@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <title>لوحة التحكم</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css" />
+  <script type="module" src="dashboard.js"></script>
+</head>
+
+<!-- مكتبة jsPDF لتصدير PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- مكتبة autoTable لإضافة جداول في PDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+<!-- مكتبة SheetJS لتصدير Excel -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<body>
+  <header class="header">
+    <h1>شركة مستورة للمقاولات</h1>
+    <button id="logoutBtn">تسجيل الخروج</button>
+  </header>
+
+  <main class="main-content">
+    <section class="add-worker-section">
+      <h2>إضافة عامل جديد</h2>
+      <form id="addWorkerForm">
+        <input type="text" id="name" placeholder="اسم العامل" required />
+        <input type="text" id="iqama" placeholder="رقم الإقامة" required />
+        <input type="text" id="jobNumber" placeholder="الرقم الوظيفي" required />
+        <input type="text" id="jobTitle" placeholder="الوظيفة" required />
+        
+        <div id="courses-container">
+          <label>صورة الدورة (PDF أو صورة):</label>
+          <input type="file" id="courseFile" accept=".pdf,image/*" required />
+          <label>صورة الإقامة:</label>
+          <input type="file" id="iqamaFile" accept="image/*" required />
+
+          <div class="course-entry">
+            <input type="text" name="courseName" placeholder="اسم الدورة" required />
+            <input type="date" name="expiryDate" required />
+          </div>
+        </div>
+
+        <button type="button" id="addCourseBtn">إضافة دورة جديدة</button>
+        <input type="text" id="branch" placeholder="اسم الفرع" required />
+        <button type="submit">إضافة</button>
+      </form>
+      <p id="addMsg"></p>
+    </section>
+
+    <div class="controls">
+      <input type="text" id="searchInput" placeholder="ابحث برقم الإقامة أو الرقم الوظيفي" />
+      <select id="courseFilter">
+        <option value="">كل الدورات</option>
+        <option value="السلامة">السلامة</option>
+        <option value="الإسعافات الأولية">الإسعافات الأولية</option>
+        <!-- أضف المزيد هنا حسب الحاجة -->
+      </select>
+      <div class="export-buttons">
+        <button id="exportPDF">📄 PDF</button>
+        <button id="exportExcel">📊 Excel</button>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table id="workersTable">
+        <thead>
+          <tr>
+            <th>الاسم</th>
+            <th>رقم الإقامة</th>
+            <th>الرقم الوظيفي</th>
+            <th>الوظيفة</th>
+            <th>الدورات</th>
+            <th>الفرع</th>
+            <th>الحالة</th>
+            <th>الملفات</th>
+            <th>الإجراءات</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </main>
+</body>
+</html>

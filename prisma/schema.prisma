@@ -1,0 +1,452 @@
+// 1. مصدر البيانات
+generator client {
+provider = "prisma-client-js"
+}
+
+datasource db {
+provider = "postgresql"
+url      = env("DATABASE_URL")
+}
+
+// 2. الأدوار والمستخدمون
+enum RoleName {
+ADMIN
+HR
+EQUIPMENT_MANAGER
+VIEWER
+}
+
+model User {
+id        Int      @id @default(autoincrement())
+username  String
+password  String
+role      RoleName @default(VIEWER)
+createdAt DateTime @default(now())
+
+  companyId Int @default(1)
+  @@unique([companyId, username])
+  @@index([companyId])
+}
+
+// 3. الفروع
+model Branch {
+id        Int         @id @default(autoincrement())
+name      String
+code      String
+address   String?
+phone     String?
+status    String      @default("active")
+employees Employee[]
+equipment Equipment[]
+projects  Project[]
+
+  companyId Int @default(1)
+  @@unique([companyId, code])
+  @@index([companyId])
+}
+
+// 4. العاملون (المحور الأساسي)
+model Employee {
+id               Int                @id @default(autoincrement())
+internalNumber   String
+jobNumber        String
+name             String
+iqamaNumber      String
+nationality      String?
+attendanceStatus String?            @default("present")
+phone            String?
+profession       String?
+hireDate         DateTime
+status           String             @default("active")
+notes            String?
+
+branch           Branch             @relation(fields: [branchId], references: [id])
+branchId         Int
+
+courses          EmployeeCourse[]
+cards            EmployeeCard[]
+driverProfile    DriverProfile?
+equipmentCards   EmployeeEquipment[]
+
+// العلاقة الجديدة الخاصة بالمرفقات
+attachments      EmployeeAttachment[]
+documents        EmployeeDocument[]
+managedProjects Project[]            @relation("ProjectManager")
+assignments      ProjectAssignment[]
+permitWorkers    WorkPermitWorker[]
+
+createdAt        DateTime           @default(now())
+updatedAt        DateTime           @updatedAt
+
+  companyId Int @default(1)
+  @@unique([companyId, internalNumber])
+  @@unique([companyId, jobNumber])
+  @@unique([companyId, iqamaNumber])
+  @@index([companyId])
+}
+
+// جدول المرفقات الجديد
+model EmployeeAttachment {
+id         Int      @id @default(autoincrement())
+employeeId Int
+employee   Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+fileName   String
+filePath   String
+uploadedAt DateTime @default(now())
+
+  companyId Int @default(1)
+  @@index([companyId])
+}
+
+// 5. الدورات التدريبية
+model Course {
+id             Int              @id @default(autoincrement())
+name           String
+code           String
+description    String?
+validityPeriod Int              // فترة الصلاحية بالأيام
+employees      EmployeeCourse[]
+requirements JobRequirement[]
+
+  companyId Int @default(1)
+  @@unique([companyId, code])
+  @@index([companyId])
+}
+
+model EmployeeCourse {
+id                Int      @id @default(autoincrement())
+employee          Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+employeeId        Int
+course            Course   @relation(fields: [courseId], references: [id])
+courseId          Int
+courseDate        DateTime
+expiryDate        DateTime
+certificateNumber String?
+attachment        String?
+status            String   @default("valid") // سارية، تنتهي قريباً، منتهية
+notes             String?
+
+  companyId Int @default(1)
+  @@index([companyId])
+}
+
+// 6. كروت الاختبار والتأهيل
+model QualificationCard {
+id          Int            @id @default(autoincrement())
+code        String // مثل CTCT06
+name        String
+description String?
+employees   EmployeeCard[]
+requirements JobRequirement[]
+
+  companyId Int @default(1)
+  @@unique([companyId, code])
+  @@index([companyId])
+}
+
+model EmployeeCard {
+id         Int               @id @default(autoincrement())
+employee   Employee          @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+employeeId Int
+card       QualificationCard @relation(fields: [cardId], references: [id])
+cardId     Int
+cardNumber String
+issueDate  DateTime
+expiryDate DateTime
+attachment String?
+status     String            @default("valid")
+notes      String?
+
+  companyId Int @default(1)
+  @@index([companyId])
+}
+
+// 7. السائقون (ملحق بالعامل)
+model DriverProfile {
+id                   Int       @id @default(autoincrement())
+employee             Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+employeeId           Int       @unique
+licenseNumber        String
+licenseType          String
+licenseIssueDate     DateTime
+licenseExpiryDate    DateTime
+driverCardNumber     String?
+driverCardExpiryDate DateTime?
+status               String    @default("active")
+notes                String?
+
+  companyId Int @default(1)
+  @@index([companyId])
+}
+
+// 8. المعدات وأنواعها
+model EquipmentType {
+id            Int                 @id @default(autoincrement())
+name          String // باكولودر، هايب، الخ
+employeeCards EmployeeEquipment[]
+equipment     Equipment[]
+
+  companyId Int @default(1)
+  @@unique([companyId, name])
+  @@index([companyId])
+}
+
+model Equipment {
+id              Int                   @id @default(autoincrement())
+equipmentNumber String
+type            EquipmentType         @relation(fields: [typeId], references: [id])
+typeId          Int
+manufacturer    String?
+model           String?
+year            Int?
+branch          Branch                @relation(fields: [branchId], references: [id])
+branchId        Int
+status          String                @default("active")
+notes           String?
+inspections     EquipmentInspection[]
+
+  companyId Int @default(1)
+  @@unique([companyId, equipmentNumber])
+  @@index([companyId])
+}
+
+// 9. كروت تشغيل المعدات للعاملين
+model EmployeeEquipment {
+id              Int           @id @default(autoincrement())
+employee        Employee      @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+employeeId      Int
+equipmentType   EquipmentType @relation(fields: [equipmentTypeId], references: [id])
+equipmentTypeId Int
+cardNumber      String
+issueDate       DateTime
+expiryDate      DateTime
+attachment      String?
+status          String        @default("valid")
+
+  companyId Int @default(1)
+  @@index([companyId])
+}
+
+// 10. فحوصات المعدات
+model EquipmentInspection {
+id                Int       @id @default(autoincrement())
+equipment         Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+equipmentId       Int
+inspectionType    String
+inspectionDate    DateTime
+expiryDate        DateTime
+certificateNumber String?
+result            String    @default("pass")
+attachment        String?
+notes             String?
+
+  companyId Int @default(1)
+  @@index([companyId])
+}
+
+// ==========================================
+// 10. الأرشيف الإلكتروني للمستندات
+// ==========================================
+model DocumentCategory {
+id             Int                @id @default(autoincrement())
+name           String
+groupName      String
+requiresExpiry Boolean            @default(false)
+isRequired     Boolean            @default(false)
+sortOrder      Int                @default(0)
+documents      EmployeeDocument[]
+requirements   JobRequirement[]
+
+  companyId Int @default(1)
+  @@unique([companyId, name])
+  @@index([companyId])
+}
+
+model EmployeeDocument {
+id             Int              @id @default(autoincrement())
+employee       Employee         @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+employeeId     Int
+category       DocumentCategory @relation(fields: [categoryId], references: [id])
+categoryId     Int
+title          String
+documentNumber String?
+issuer         String?
+issueDate      DateTime?
+expiryDate     DateTime?
+notes          String?
+filePath       String
+originalName   String
+mimeType       String?
+size           Int              @default(0)
+version        Int              @default(1)
+status         String           @default("active")
+previousId     Int?
+uploadedBy     String?
+createdAt      DateTime         @default(now())
+
+@@index([employeeId])
+
+  companyId Int @default(1)
+  @@index([companyId])
+}
+
+// ==========================================
+// 11. الوظائف ومتطلباتها (مصفوفة الكفاءة)
+// ==========================================
+model JobRole {
+id           Int              @id @default(autoincrement())
+name         String
+description  String?
+requirements JobRequirement[]
+
+  companyId Int @default(1)
+  @@unique([companyId, name])
+  @@index([companyId])
+}
+
+model JobRequirement {
+id         Int                @id @default(autoincrement())
+jobRole    JobRole            @relation(fields: [jobRoleId], references: [id], onDelete: Cascade)
+jobRoleId  Int
+course     Course?            @relation(fields: [courseId], references: [id], onDelete: Cascade)
+courseId   Int?
+card       QualificationCard? @relation(fields: [cardId], references: [id], onDelete: Cascade)
+cardId     Int?
+category   DocumentCategory?  @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+categoryId Int?
+
+  companyId Int @default(1)
+  @@index([companyId])
+}
+
+// ==========================================
+// 12. الاستيراد الجماعي وسجل العمليات والإعدادات
+// ==========================================
+model BulkImportJob {
+id          Int       @id @default(autoincrement())
+status      String    @default("preview")
+zipPath     String?
+summary     Json?
+createdBy   String?
+createdAt   DateTime  @default(now())
+completedAt DateTime?
+
+  companyId Int @default(1)
+  @@index([companyId])
+}
+
+model AuditLog {
+id        Int      @id @default(autoincrement())
+username  String
+action    String
+entity    String
+entityId  String?
+details   String?
+createdAt DateTime @default(now())
+
+@@index([createdAt])
+
+  companyId Int @default(1)
+  @@index([companyId])
+}
+
+model AppSetting {
+key   String @id
+value String
+}
+
+// ==========================================
+// 13. المشاريع وتصاريح العمل وحركة العمال
+// ==========================================
+model Project {
+  id             Int       @id @default(autoincrement())
+  code           String
+  name           String
+  client         String?
+  contractNumber String?
+  location       String?
+  branch         Branch?   @relation(fields: [branchId], references: [id])
+  branchId       Int?
+  manager        Employee? @relation("ProjectManager", fields: [managerId], references: [id])
+  managerId      Int?
+  startDate      DateTime?
+  endDate        DateTime?
+  status         String    @default("active")
+  budget         Float?
+  notes          String?
+  assignments    ProjectAssignment[]
+  permits        WorkPermit[]
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  companyId Int @default(1)
+  @@unique([companyId, code])
+  @@index([companyId])
+}
+
+model ProjectAssignment {
+  id         Int       @id @default(autoincrement())
+  employee   Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId Int
+  project    Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId  Int
+  role       String?
+  startDate  DateTime  @default(now())
+  endDate    DateTime?
+  status     String    @default("active")
+  notes      String?
+  createdBy  String?
+  createdAt  DateTime  @default(now())
+
+  @@index([employeeId])
+  @@index([projectId])
+
+  companyId Int @default(1)
+  @@index([companyId])
+}
+
+model WorkPermit {
+  id           Int                @id @default(autoincrement())
+  permitNumber String
+  project      Project            @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId    Int
+  type         String
+  issuer       String?
+  location     String?
+  issueDate    DateTime
+  expiryDate   DateTime
+  status       String             @default("active")
+  notes        String?
+  attachment   String?
+  workers      WorkPermitWorker[]
+  createdAt    DateTime           @default(now())
+
+  companyId Int @default(1)
+  @@unique([companyId, permitNumber])
+  @@index([companyId])
+}
+
+model WorkPermitWorker {
+  id         Int        @id @default(autoincrement())
+  permit     WorkPermit @relation(fields: [permitId], references: [id], onDelete: Cascade)
+  permitId   Int
+  employee   Employee   @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  employeeId Int
+
+  @@unique([permitId, employeeId])
+
+  companyId Int @default(1)
+  @@index([companyId])
+}
+
+// ==========================================
+// 14. الشركات (المستأجرون) — عزل بيانات كل شركة
+// ==========================================
+model Company {
+  id        Int      @id @default(autoincrement())
+  name      String
+  slug      String   @unique
+  plan      String   @default("trial")
+  status    String   @default("active")
+  createdAt DateTime @default(now())
+}

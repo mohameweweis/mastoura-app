@@ -3,10 +3,9 @@ import axios from 'axios';
 const TOKEN_KEY = 'hr_token';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'const API_URL = 'https://mastoura-app.onrender.com/api';',
+  baseURL: import.meta.env.VITE_API_URL || 'https://mastoura-app.onrender.com/api',
   timeout: 30000,
 });
-
 export const getToken = () => localStorage.getItem(TOKEN_KEY);
 export const setToken = (token: string | null) => {
   if (token) localStorage.setItem(TOKEN_KEY, token);

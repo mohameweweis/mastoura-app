@@ -3,7 +3,7 @@ import axios from 'axios';
 const TOKEN_KEY = 'hr_token';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
+  baseURL: import.meta.env.VITE_API_URL || 'const API_URL = 'https://mastoura-app.onrender.com/api';',
   timeout: 30000,
 });
 

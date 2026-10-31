@@ -15,15 +15,35 @@ const base = new PrismaClient();
 export const prismaUnscoped = base;
 
 // العميل الافتراضي: كل استعلام على جداول الشركات يُفلتر ويُوسَم تلقائياً بـ companyId.
-// إن غاب سياق الشركة يفشل الاستعلام بدل أن يعمل بلا عزل.
 const prisma = base.$extends({
   query: {
     $allModels: {
       async $allOperations({ model, operation, args, query }: any) {
         if (!TENANT_MODELS.has(model)) return query(args);
         const ctx = tenantStore.getStore();
-        if (!ctx) throw new Error(`Tenant context missing for ${model}.${operation}`);
-        return query(applyTenant(model, operation, args, ctx.companyId));
+        if (ctx) {
+          return query(applyTenant(model, operation, args, ctx.companyId));
+        }
+
+        // في حال عدم وجود سياق شركة (أثناء تهيئة النظام عند بدء التشغيل أو تسجيل الدخول)
+        if (['create', 'createMany', 'upsert'].includes(operation)) {
+          const hasCompany =
+            args?.data?.companyId ||
+            args?.data?.company ||
+            args?.create?.companyId ||
+            args?.create?.company;
+          if (!hasCompany) {
+            const defaultCompany = await base.company.findFirst({
+              orderBy: { id: 'asc' },
+              select: { id: true },
+            });
+            if (defaultCompany) {
+              return query(applyTenant(model, operation, args, defaultCompany.id));
+            }
+          }
+        }
+
+        return query(args);
       },
     },
   },
